@@ -19,15 +19,17 @@ import com.megacrit.cardcrawl.map.LegendItem;
 import com.megacrit.cardcrawl.screens.DungeonMapScreen;
 import com.megacrit.cardcrawl.vfx.MapDot;
 import mapeditor.helper.MapManipulator;
+import mapeditor.helper.MapSaver;
 import mapeditor.helper.NodeLinker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
 @SpireInitializer
-public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber, PostRenderSubscriber {
+public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber, PostRenderSubscriber, StartActSubscriber {
 
     public static final Logger logger = LogManager.getLogger(MapEditor.class.getName());
 
@@ -49,6 +51,12 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
 
     ModPanel settingsPanel;
 
+    public static MapSaver mapSaver;
+
+    @Override
+    public void receiveStartAct() {
+        MapSaver.edits.clear();
+    }
 
 
     public enum RoomType {
@@ -67,7 +75,12 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
         BaseMod.subscribe(this);
         logger.info("Done subscribing");
 
-
+        try {
+            mapSaver = new MapSaver();
+        } catch (IOException e) {
+            logger.info("Error loading map modifications");
+            e.printStackTrace();
+        }
     }
 
     public static void initialize() {
@@ -121,7 +134,9 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
                 //Place down nodes
                 if(selectedRoomType != null) {
                     MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY);
-                    selectedRoomType = null;
+                    MapSaver.edits.add(new MapSaver.MapEditAction(selectedRoomType, InputHelper.mX, InputHelper.mY));
+                    if(!ctrlKey.isPressed())
+                        selectedRoomType = null;
                 }
             }
         }

@@ -24,7 +24,7 @@ public class NodeLinker {
 
     public static void linkBoss(MapRoomNode parent) {
         int dstY = AbstractDungeon.map.size() + 1;
-        MapEdge e = new MapEdge(parent.x, parent.y, parent.offsetX, parent.offsetY, 3, dstY, AbstractDungeon.dungeonMapScreen.map.bossHb.x - MapRoomNode.OFFSET_X, AbstractDungeon.dungeonMapScreen.map.bossHb.y - dstY * Settings.MAP_DST_Y, true);
+        MapEdge e = new MapEdge(parent.x, parent.y, parent.offsetX, parent.offsetY, 3,  dstY, 0, 0, true);
         parent.addEdge(e);
     }
 

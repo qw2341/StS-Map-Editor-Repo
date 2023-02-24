@@ -6,6 +6,7 @@ import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.map.DungeonMap;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import javassist.CtBehavior;
+import mapeditor.helper.MapSaver;
 import mapeditor.helper.NodeLinker;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class BossNodePatch {
             if(__instance.bossHb.hovered && InputHelper.justClickedRight) {
                 if (NodeLinker.node1 != null) {
                     NodeLinker.linkBoss(NodeLinker.node1);
+                    MapSaver.edits.add(new MapSaver.MapEditAction(NodeLinker.node1, null));
                     NodeLinker.node1 = null;
                 }
             }
