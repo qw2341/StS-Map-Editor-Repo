@@ -13,6 +13,7 @@ import com.megacrit.cardcrawl.helpers.EventHelper;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.map.DungeonMap;
 import com.megacrit.cardcrawl.map.LegendItem;
+import mapeditor.helper.MapManipulator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,8 +96,9 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
 //
 //                }
                 //Place down nodes
-
-
+                if(selectedRoomType != null) {
+                    MapManipulator.placeNode(selectedRoomType, 1, 1);
+                }
             }
         }
     }
