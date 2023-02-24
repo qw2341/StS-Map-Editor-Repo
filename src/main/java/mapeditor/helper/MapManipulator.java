@@ -33,8 +33,8 @@ public class MapManipulator {
 
         roomToAdd.offsetX = x - xNum * 128.0f;
         roomToAdd.offsetY = y - yNum * Settings.MAP_DST_Y;
-        MapEditor.logger.info("offsetX: " + roomToAdd.offsetX + " offsetY: " + roomToAdd.offsetY + " at (" + x + ", " + y + ")");
-        MapEditor.logger.info("Placing node of Type: " + roomType + " at (" + xNum + ", " + yNum + ")");
+//        MapEditor.logger.info("offsetX: " + roomToAdd.offsetX + " offsetY: " + roomToAdd.offsetY + " at (" + x + ", " + y + ")");
+//        MapEditor.logger.info("Placing node of Type: " + roomType + " at (" + xNum + ", " + yNum + ")");
         row.add(roomToAdd);
 
         AbstractDungeon.dungeonMapScreen.updateImage();

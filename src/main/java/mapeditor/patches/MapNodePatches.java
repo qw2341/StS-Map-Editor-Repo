@@ -44,8 +44,8 @@ public class MapNodePatches {
                 if(MapEditor.INSTANCE.shiftKey.isPressed()) {
                     MapManipulator.removeNode(__instance);
                 } else {
-                    MapEditor.logger.info("Edges for node: (" + __instance.x + ", " + __instance.y + ") are : ");
-                    for(MapEdge e : __instance.getEdges()) MapEditor.logger.info("[" + e.srcX+ ", " +e.srcY + " -> "+ e.dstX+ ", " + e.dstY +"]");
+//                    MapEditor.logger.info("Edges for node: (" + __instance.x + ", " + __instance.y + ") are : ");
+//                    for(MapEdge e : __instance.getEdges()) MapEditor.logger.info("[" + e.srcX+ ", " +e.srcY + " -> "+ e.dstX+ ", " + e.dstY +"]");
                     if (NodeLinker.node1 == null) {
                         NodeLinker.node1 = __instance;
                     } else {
