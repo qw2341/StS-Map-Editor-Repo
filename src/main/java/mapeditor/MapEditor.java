@@ -4,15 +4,22 @@ import basemod.BaseMod;
 import basemod.ModPanel;
 import basemod.interfaces.EditStringsSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
+import basemod.interfaces.PostUpdateSubscriber;
+import basemod.interfaces.PreUpdateSubscriber;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.EventHelper;
+import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.map.DungeonMap;
+import com.megacrit.cardcrawl.map.LegendItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
 @SpireInitializer
-public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber {
+public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber {
 
     public static final Logger logger = LogManager.getLogger(MapEditor.class.getName());
 
@@ -28,6 +35,16 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
     private static final String DESCRIPTION = "Map editor.";
 
     ModPanel settingsPanel;
+    public enum RoomType {
+        EVENT,
+        ELITE,
+        TREASURE,
+        SHOP,
+        MONSTER,
+        CAMPFIRE
+    }
+
+    public static RoomType selectedRoomType = null;
 
     public MapEditor() {
         logger.info("Subscribe to BaseMod hooks");
@@ -57,5 +74,30 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
     @Override
     public void receivePostInitialize() {
 
+    }
+    @Override
+    public void receivePreUpdate() {
+        if(AbstractDungeon.isPlayerInDungeon()) {
+            if(AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP) {
+                if(selectedRoomType != null && InputHelper.pressedEscape) {
+                    selectedRoomType = null;
+                    InputHelper.pressedEscape = false;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void receivePostUpdate() {
+        if(AbstractDungeon.isPlayerInDungeon()) {
+            if(InputHelper.justClickedLeft && AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP) {
+//                if(AbstractDungeon.dungeonMapScreen.map.legend.items.stream().noneMatch(legendItem -> legendItem.hb.hovered)) {
+//
+//                }
+                //Place down nodes
+
+
+            }
+        }
     }
 }
