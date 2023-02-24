@@ -17,6 +17,7 @@ public class LegendItemPatch {
             if(InputHelper.justClickedLeft) {
                 int idx = ReflectionHacks.getPrivate(__instance, LegendItem.class, "index");
                 MapEditor.selectedRoomType = indexToRoomType(idx);
+                MapEditor.logger.info("Selected Room: " + MapEditor.selectedRoomType);
             }
 
         }

@@ -2,25 +2,30 @@ package mapeditor;
 
 import basemod.BaseMod;
 import basemod.ModPanel;
-import basemod.interfaces.EditStringsSubscriber;
-import basemod.interfaces.PostInitializeSubscriber;
-import basemod.interfaces.PostUpdateSubscriber;
-import basemod.interfaces.PreUpdateSubscriber;
+import basemod.interfaces.*;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.EventHelper;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.map.DungeonMap;
 import com.megacrit.cardcrawl.map.LegendItem;
+import com.megacrit.cardcrawl.screens.DungeonMapScreen;
+import com.megacrit.cardcrawl.vfx.MapDot;
 import mapeditor.helper.MapManipulator;
+import mapeditor.helper.NodeLinker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
 @SpireInitializer
-public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber {
+public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber, PostRenderSubscriber {
 
     public static final Logger logger = LogManager.getLogger(MapEditor.class.getName());
 
@@ -36,6 +41,9 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
     private static final String DESCRIPTION = "Map editor.";
 
     ModPanel settingsPanel;
+
+
+
     public enum RoomType {
         EVENT,
         ELITE,
@@ -84,6 +92,10 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
                     selectedRoomType = null;
                     InputHelper.pressedEscape = false;
                 }
+                if(NodeLinker.node1 != null && InputHelper.pressedEscape) {
+                    NodeLinker.node1 = null;
+                    InputHelper.pressedEscape = false;
+                }
             }
         }
     }
@@ -92,14 +104,50 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
     public void receivePostUpdate() {
         if(AbstractDungeon.isPlayerInDungeon()) {
             if(InputHelper.justClickedLeft && AbstractDungeon.screen == AbstractDungeon.CurrentScreen.MAP) {
-//                if(AbstractDungeon.dungeonMapScreen.map.legend.items.stream().noneMatch(legendItem -> legendItem.hb.hovered)) {
-//
-//                }
+                if(AbstractDungeon.dungeonMapScreen.map.legend.items.stream().anyMatch(legendItem -> legendItem.hb.hovered)) {
+                    //if clicking on the legend, return
+                    return;
+                }
                 //Place down nodes
                 if(selectedRoomType != null) {
-                    MapManipulator.placeNode(selectedRoomType, 1, 1);
+                    MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY);
+                    selectedRoomType = null;
                 }
             }
         }
+    }
+
+    public static Texture getRoomImage(RoomType roomType) {
+        switch (roomType) {
+            default:
+            case EVENT:
+                return ImageMaster.MAP_NODE_EVENT;
+            case ELITE:
+                return ImageMaster.MAP_NODE_ELITE;
+            case TREASURE:
+                return ImageMaster.MAP_NODE_TREASURE;
+            case SHOP:
+                return ImageMaster.MAP_NODE_MERCHANT;
+            case MONSTER:
+                return ImageMaster.MAP_NODE_ENEMY;
+            case CAMPFIRE:
+                return ImageMaster.MAP_NODE_REST;
+        }
+    }
+
+    @Override
+    public void receivePostRender(SpriteBatch sb) {
+        if(AbstractDungeon.isPlayerInDungeon()) {
+            if(selectedRoomType != null) {
+                sb.draw(getRoomImage(selectedRoomType), InputHelper.mX - 32.0F, InputHelper.mY - 32.0F, 32.0F, 32.0F, 64.0F, 64.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 128, 128, false, false);
+            }
+
+            if(NodeLinker.node1 != null) {
+                ArrayList<MapDot> dots = NodeLinker.getDots(NodeLinker.node1);
+                for (MapDot dot : dots)
+                    dot.render(sb);
+            }
+        }
+
     }
 }
