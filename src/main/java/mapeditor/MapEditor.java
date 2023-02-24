@@ -3,6 +3,7 @@ package mapeditor;
 import basemod.BaseMod;
 import basemod.ModPanel;
 import basemod.interfaces.*;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
@@ -11,6 +12,7 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.EventHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.map.DungeonMap;
 import com.megacrit.cardcrawl.map.LegendItem;
@@ -40,6 +42,11 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
     private static final String AUTHOR = "JasonW";
     private static final String DESCRIPTION = "Map editor.";
 
+    public static MapEditor INSTANCE;
+
+    public InputAction shiftKey;
+    public InputAction ctrlKey;
+
     ModPanel settingsPanel;
 
 
@@ -59,11 +66,13 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
         logger.info("Subscribe to BaseMod hooks");
         BaseMod.subscribe(this);
         logger.info("Done subscribing");
+
+
     }
 
     public static void initialize() {
         logger.info("========================= Initializing Map Editor Mod.  =========================");
-        MapEditor mapEditor = new MapEditor();
+        INSTANCE = new MapEditor();
         logger.info("========================= /Map Editor Mod Initialized./ =========================");
     }
 
@@ -82,7 +91,8 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
 
     @Override
     public void receivePostInitialize() {
-
+        shiftKey = new InputAction(Input.Keys.SHIFT_LEFT);
+        ctrlKey = new InputAction(Input.Keys.CONTROL_LEFT);
     }
     @Override
     public void receivePreUpdate() {

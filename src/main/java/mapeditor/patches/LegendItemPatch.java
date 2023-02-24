@@ -13,10 +13,9 @@ public class LegendItemPatch {
     @SpirePatch(clz = LegendItem.class, method = "update")
     public static class ItemHover{
         @SpireInsertPatch(locator = Locator.class)
-        public static void Insert(LegendItem __instance) {
+        public static void Insert(LegendItem __instance, int ___index) {
             if(InputHelper.justClickedLeft) {
-                int idx = ReflectionHacks.getPrivate(__instance, LegendItem.class, "index");
-                MapEditor.selectedRoomType = indexToRoomType(idx);
+                MapEditor.selectedRoomType = indexToRoomType(___index);
                 MapEditor.logger.info("Selected Room: " + MapEditor.selectedRoomType);
             }
 

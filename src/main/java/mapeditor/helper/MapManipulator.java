@@ -12,6 +12,7 @@ import mapeditor.patches.MapNodePatches;
 import java.util.ArrayList;
 
 public class MapManipulator {
+    public static boolean removingNode = false;
 
     public static void placeNode(MapEditor.RoomType roomType, int x, int y) {
         x -=  MapRoomNode.OFFSET_X;
@@ -62,6 +63,11 @@ public class MapManipulator {
     }
 
     public static void removeNode(MapRoomNode node) {
-
+        MapNodePatches.setShouldRender(node, false);
+        node.getParents().forEach(parent -> {
+            if(parent.getEdges().remove(parent.getEdgeConnectedTo(node)))
+                MapNodePatches.setNodeCustom(parent,true);
+        });
+        removingNode = true;
     }
 }

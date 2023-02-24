@@ -3,6 +3,7 @@ package mapeditor.helper;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
@@ -16,10 +17,15 @@ public class NodeLinker {
     public static MapRoomNode node1 = null;
 
     public static void link(MapRoomNode parent, MapRoomNode child) {
-        MapEdge e = new MapEdge(parent.x, parent.y, parent.offsetX, parent.offsetY, child.x, child.y, child.offsetX, child.offsetY, child.room instanceof MonsterRoomBoss);
+        MapEdge e = new MapEdge(parent.x, parent.y, parent.offsetX, parent.offsetY, child.x, child.y, child.offsetX, child.offsetY, false);
         parent.addEdge(e);
-        child.addEdge(e);
         child.addParent(parent);
+    }
+
+    public static void linkBoss(MapRoomNode parent) {
+        int dstY = AbstractDungeon.map.size() + 1;
+        MapEdge e = new MapEdge(parent.x, parent.y, parent.offsetX, parent.offsetY, 3, dstY, AbstractDungeon.dungeonMapScreen.map.bossHb.x - MapRoomNode.OFFSET_X, AbstractDungeon.dungeonMapScreen.map.bossHb.y - dstY * Settings.MAP_DST_Y, true);
+        parent.addEdge(e);
     }
 
     public static ArrayList<MapDot> getDots(MapRoomNode node) {

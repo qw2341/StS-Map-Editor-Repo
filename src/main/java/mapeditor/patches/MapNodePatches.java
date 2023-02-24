@@ -2,8 +2,11 @@ package mapeditor.patches;
 
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.map.MapEdge;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import javassist.CtBehavior;
+import mapeditor.MapEditor;
+import mapeditor.helper.MapManipulator;
 import mapeditor.helper.NodeLinker;
 
 public class MapNodePatches {
@@ -38,12 +41,19 @@ public class MapNodePatches {
         @SpireInsertPatch(locator = UpdateLocator.class)
         public static void Insert(MapRoomNode __instance) {
             if(__instance.hb.hovered && InputHelper.justClickedRight) {
-                if (NodeLinker.node1 == null) {
-                    NodeLinker.node1 = __instance;
+                if(MapEditor.INSTANCE.shiftKey.isPressed()) {
+                    MapManipulator.removeNode(__instance);
                 } else {
-                    NodeLinker.link(NodeLinker.node1, __instance);
-                    NodeLinker.node1 = null;
+                    MapEditor.logger.info("Edges for node: (" + __instance.x + ", " + __instance.y + ") are : ");
+                    for(MapEdge e : __instance.getEdges()) MapEditor.logger.info("[" + e.srcX+ ", " +e.srcY + " -> "+ e.dstX+ ", " + e.dstY +"]");
+                    if (NodeLinker.node1 == null) {
+                        NodeLinker.node1 = __instance;
+                    } else {
+                        if(__instance != NodeLinker.node1) NodeLinker.link(NodeLinker.node1, __instance);
+                        NodeLinker.node1 = null;
+                    }
                 }
+
             }
         }
     }
