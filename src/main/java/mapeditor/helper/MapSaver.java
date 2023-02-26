@@ -1,8 +1,10 @@
 package mapeditor.helper;
 
 import basemod.abstracts.CustomSavable;
+import com.badlogic.gdx.Gdx;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.google.gson.reflect.TypeToken;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import mapeditor.MapEditor;
@@ -11,10 +13,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 public class MapSaver{
     private final Type mapEditType;
@@ -28,48 +27,72 @@ public class MapSaver{
         ActionType action;
 
         MapEditor.RoomType roomType;
-        int x;
-        int y;
 
-        MapRoomNode parent;
-        MapRoomNode child;
+        int pX;
+        int pY;
+        float pOffX;
+        float pOffY;
+        int cX;
+        int cY;
+        float cOffX;
+        float cOffY;
 
-        public MapEditAction(MapEditor.RoomType roomType, int x, int y) {
+        boolean isBoss = false;
+
+        public MapEditAction(MapEditor.RoomType roomType, int x, int y, float pOffX, float pOffY) {
             this.roomType = roomType;
-            this.x = x;
-            this.y = y;
+            this.pX = x;
+            this.pY = y;
+            this.pOffX = pOffX;
+            this.pOffY = pOffY;
             this.action = ActionType.ADD;
         }
 
         public MapEditAction(MapRoomNode parent, MapRoomNode child) {
             this.action = ActionType.LINK;
-            this.parent = parent;
-            this.child = child;
+            this.pX = parent.x;
+            this.pY = parent.y;
+            this.pOffX = parent.offsetX;
+            this.pOffY = parent.offsetY;
+            if(child == null) {
+                this.isBoss = true;
+            } else {
+                this.cX = child.x;
+                this.cY = child.y;
+                this.cOffX = child.offsetX;
+                this.cOffY = child.offsetY;
+            }
+
         }
 
         public MapEditAction(MapRoomNode removingNode) {
             this.action = ActionType.REMOVE;
-            this.parent = removingNode;
+            this.pX = removingNode.x;
+            this.pY = removingNode.y;
         }
 
         public void execute() {
+            MapEditor.logger.info("Executing " + this.toString());
             switch (action) {
                 case ADD:
-                    MapManipulator.placeNode(this.roomType, this.x, this.y);
+                    MapManipulator.placeNode(this.roomType, pX,pY,pOffX,pOffY);
                     break;
                 case LINK:
-                    if(this.child != null) NodeLinker.link(this.parent, this.child);
-                    else NodeLinker.linkBoss(this.parent);
+                    NodeLinker.link(this.pX,this.pY,pOffX,pOffY,cX,cY,cOffX,cOffY, this.isBoss);
                     break;
                 case REMOVE:
-                    MapManipulator.removeNode(this.parent);
+                    MapManipulator.removeNode(this.pX,this.pY);
                     break;
             }
         }
 
+        @Override
+        public String toString() {
+            return "[ Action: " + this.action + "; x = "+ this.pX + "; y = " + this.pY + "; ]";
+        }
     }
 
-    public static Queue<MapEditAction> edits = new PriorityQueue<>();
+    public static ArrayList<MapEditAction> edits = new ArrayList<>();
 
 //    @Override
 //    public Queue<MapEditAction> onSave() {
@@ -86,21 +109,31 @@ public class MapSaver{
 //    }
 
     public MapSaver() throws IOException {
-        this.filePath = SpireConfig.makeFilePath("loadoutMod","CardModifications","json");
+        this.filePath = SpireConfig.makeFilePath("MapEditor","MapEdits","json");
         this.file = new File(this.filePath);
         this.file.createNewFile();
-        this.mapEditType = new TypeToken<Queue<MapEditAction>>() { }.getType();
+        this.mapEditType = new TypeToken<ArrayList<MapEditAction>>() { }.getType();
     }
 
     public void load() throws IOException {
         Reader reader = Files.newBufferedReader(Paths.get(this.filePath));
-        Queue<MapEditAction> editActions = CustomSavable.saveFileGson.fromJson(reader, mapEditType);
+        ArrayList<MapEditAction> editActions = null;
+        try {
+            editActions = CustomSavable.saveFileGson.fromJson(reader, mapEditType);
+        } catch (Exception e){
+            e.printStackTrace();
+            MapEditor.logger.info("Error occurred while loading saved edits, deleting map modifications");
+            Gdx.files.local(this.filePath).delete();
+        }
+
         if (editActions != null) {
             edits = editActions;
             Iterator<MapEditAction> editIt = editActions.iterator();
             while (editIt.hasNext()) {
                 editIt.next().execute();
             }
+        } else {
+            edits = new ArrayList<>();
         }
 
         reader.close();

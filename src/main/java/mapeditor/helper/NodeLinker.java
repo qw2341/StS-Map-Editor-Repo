@@ -2,6 +2,7 @@ package mapeditor.helper;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
@@ -13,6 +14,7 @@ import com.megacrit.cardcrawl.vfx.MapDot;
 import mapeditor.MapEditor;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class NodeLinker {
     public static MapRoomNode node1 = null;
@@ -24,6 +26,7 @@ public class NodeLinker {
     }
 
     public static void link(int srcX, int srcY, float srcOffsetX, float srcOffsetY, int dstX, int dstY, float dstOffsetX, float dstOffsetY, boolean isBoss) {
+        if(isBoss) dstY = AbstractDungeon.map.size() + 2;
         MapEdge e = (isBoss) ? new MapEdge(srcX,srcY,srcOffsetX,srcOffsetY, 3,  dstY, 0, 0, true)
         : new MapEdge(srcX,srcY,srcOffsetX,srcOffsetY,dstX,dstY,dstOffsetX,dstOffsetY,false);
         MapRoomNode parent = getNode(srcX,srcY);

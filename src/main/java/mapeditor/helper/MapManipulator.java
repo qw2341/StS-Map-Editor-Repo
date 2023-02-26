@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class MapManipulator {
     public static boolean removingNode = false;
 
-    public static void placeNode(MapEditor.RoomType roomType, int x, int y) {
+    public static MapRoomNode placeNode(MapEditor.RoomType roomType, int x, int y) {
         x -=  MapRoomNode.OFFSET_X;
         y -= DungeonMapScreen.offsetY + 180.0F * Settings.scale;
 
@@ -38,6 +38,17 @@ public class MapManipulator {
         row.add(roomToAdd);
 
         AbstractDungeon.dungeonMapScreen.updateImage();
+        return roomToAdd;
+    }
+
+    public static void placeNode(MapEditor.RoomType roomType, int x, int y, float offsetX,float offsetY) {
+        ArrayList<ArrayList<MapRoomNode>> map = AbstractDungeon.map;
+        MapRoomNode mapRoomNode = new MapRoomNode(x,y);
+        mapRoomNode.offsetX = offsetX;
+        mapRoomNode.offsetY = offsetY;
+        mapRoomNode.room = getRoom(roomType);
+        MapNodePatches.setNodeCustom(mapRoomNode, true);
+        map.get(y).add(mapRoomNode);
     }
 
     public static AbstractRoom getRoom(MapEditor.RoomType roomType) {
@@ -69,5 +80,9 @@ public class MapManipulator {
                 MapNodePatches.setNodeCustom(parent,true);
         });
         removingNode = true;
+    }
+
+    public static void removeNode(int x, int y) {
+        removeNode(NodeLinker.getNode(x,y));
     }
 }

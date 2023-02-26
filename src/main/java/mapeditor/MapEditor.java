@@ -16,6 +16,7 @@ import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
 import com.megacrit.cardcrawl.map.DungeonMap;
 import com.megacrit.cardcrawl.map.LegendItem;
+import com.megacrit.cardcrawl.map.MapRoomNode;
 import com.megacrit.cardcrawl.screens.DungeonMapScreen;
 import com.megacrit.cardcrawl.vfx.MapDot;
 import mapeditor.helper.MapManipulator;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 @SpireInitializer
-public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber, PostRenderSubscriber, StartActSubscriber {
+public class MapEditor implements EditStringsSubscriber, PostInitializeSubscriber, PostUpdateSubscriber, PreUpdateSubscriber, PostRenderSubscriber, StartActSubscriber, PostDeathSubscriber {
 
     public static final Logger logger = LogManager.getLogger(MapEditor.class.getName());
 
@@ -56,6 +57,22 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
     @Override
     public void receiveStartAct() {
         MapSaver.edits.clear();
+        try {
+            mapSaver.save();
+        } catch (IOException e) {
+            logger.info("Failed to save map modifications!");
+            e.printStackTrace();
+        }
+    }
+    @Override
+    public void receivePostDeath() {
+        MapSaver.edits.clear();
+        try {
+            mapSaver.save();
+        } catch (IOException e) {
+            logger.info("Failed to save map modifications!");
+            e.printStackTrace();
+        }
     }
 
 
@@ -133,8 +150,8 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
                 }
                 //Place down nodes
                 if(selectedRoomType != null) {
-                    MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY);
-                    MapSaver.edits.add(new MapSaver.MapEditAction(selectedRoomType, InputHelper.mX, InputHelper.mY));
+                    MapRoomNode node =  MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY);
+                    MapSaver.edits.add(new MapSaver.MapEditAction(selectedRoomType, node.x, node.y, node.offsetX, node.offsetY));
                     if(!ctrlKey.isPressed())
                         selectedRoomType = null;
                 }
