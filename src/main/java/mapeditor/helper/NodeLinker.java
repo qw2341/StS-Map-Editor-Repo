@@ -10,6 +10,7 @@ import com.megacrit.cardcrawl.map.MapRoomNode;
 import com.megacrit.cardcrawl.rooms.MonsterRoomBoss;
 import com.megacrit.cardcrawl.screens.DungeonMapScreen;
 import com.megacrit.cardcrawl.vfx.MapDot;
+import mapeditor.MapEditor;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,20 @@ public class NodeLinker {
         MapEdge e = new MapEdge(parent.x, parent.y, parent.offsetX, parent.offsetY, child.x, child.y, child.offsetX, child.offsetY, false);
         parent.addEdge(e);
         child.addParent(parent);
+    }
+
+    public static void link(int srcX, int srcY, float srcOffsetX, float srcOffsetY, int dstX, int dstY, float dstOffsetX, float dstOffsetY, boolean isBoss) {
+        MapEdge e = (isBoss) ? new MapEdge(srcX,srcY,srcOffsetX,srcOffsetY, 3,  dstY, 0, 0, true)
+        : new MapEdge(srcX,srcY,srcOffsetX,srcOffsetY,dstX,dstY,dstOffsetX,dstOffsetY,false);
+        MapRoomNode parent = getNode(srcX,srcY);
+        try{
+            parent.addEdge(e);
+            if(!isBoss) getNode(dstX,dstY).addParent(parent);
+        } catch (NullPointerException nullPointerException) {
+            MapEditor.logger.info("Node Obtaining failed!");
+            nullPointerException.printStackTrace();
+        }
+
     }
 
     public static void linkBoss(MapRoomNode parent) {
@@ -52,5 +67,13 @@ public class NodeLinker {
     }
     public static float getY(MapRoomNode node) {
         return (float)node.y * Settings.MAP_DST_Y + node.offsetY;
+    }
+
+    public static MapRoomNode getNode(int x, int y) {
+        if(AbstractDungeon.map == null || AbstractDungeon.map.size() <= y || AbstractDungeon.map.get(y).size() <=x) {
+            MapEditor.logger.info("Coord exceeded the map! Coord given: (" + x + ", "+ y + ")");
+            return null;
+        }
+        return AbstractDungeon.map.get(y).get(x);
     }
 }
