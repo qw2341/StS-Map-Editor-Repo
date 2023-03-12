@@ -1,0 +1,12 @@
+{
+  "MapEditor:EditorControlPanel" : {
+    "TEXT": [
+      "Import",
+      "Import from Clipboard",
+      "Import a map from your clipboard. Will replace the map and seed. Also will put you on the first floor.",
+      "Export",
+      "Export to Clipboard",
+      "Copy the entire map into the clipboard, includes all your changes on all floors."
+    ]
+  }
+}

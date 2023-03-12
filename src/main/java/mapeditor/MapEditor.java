@@ -14,6 +14,8 @@ import com.megacrit.cardcrawl.helpers.EventHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.input.InputAction;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.localization.RelicStrings;
+import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.map.DungeonMap;
 import com.megacrit.cardcrawl.map.LegendItem;
 import com.megacrit.cardcrawl.map.MapRoomNode;
@@ -116,7 +118,32 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
 
     @Override
     public void receiveEditStrings() {
+        if (!languageSupport().equals("eng"))
+            loadLocStrings(languageSupport());
+        else
+            loadLocStrings("eng");
+    }
 
+    public static String languageSupport() {
+        switch (Settings.language) {
+            case ZHS:
+                return "zhs";
+//            case ZHT:
+//                return "zht";
+//            case KOR:
+//                return "kor";
+//            case JPN:
+//                return "jpn";
+//            case FRA:
+//                return "fra";
+//            case RUS:
+//                return "rus";
+        }
+        return "eng";
+    }
+
+    private void loadLocStrings(String language) {
+        BaseMod.loadCustomStringsFile(UIStrings.class, getModID() + "Resources/localization/" + language + "/UI-Strings.json");
     }
 
     @Override

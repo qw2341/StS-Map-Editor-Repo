@@ -159,4 +159,11 @@ public class MapSaver{
         }
         dungeonEdit.add(e);
     }
+
+    public static void exportMap() {
+        MapEditor.logger.info("EXPORT!");
+    }
+    public static void importMap() {
+        MapEditor.logger.info("IMPORT!");
+    }
 }
