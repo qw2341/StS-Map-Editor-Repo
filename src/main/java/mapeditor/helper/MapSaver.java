@@ -41,7 +41,7 @@ public class MapSaver{
 
 
     public enum ActionType {
-        ADD, LINK, REMOVE
+        ADD, LINK, REMOVE, CLEAR
     }
     public static class MapEditAction implements Serializable {
         ActionType action = ActionType.ADD;
@@ -91,6 +91,10 @@ public class MapSaver{
             this.pY = removingNode.y;
         }
 
+        public MapEditAction() {
+            this.action = ActionType.CLEAR;
+        }
+
         public MapEditAction(int[] nums) {
             this.action = ActionType.values()[nums[0]];
             this.roomType = nums[1] == -1 ? null : MapEditor.RoomType.values()[nums[1]];
@@ -116,6 +120,9 @@ public class MapSaver{
                     break;
                 case REMOVE:
                     MapManipulator.removeNode(this.pX,this.pY);
+                    break;
+                case CLEAR:
+                    MapManipulator.removeAllNode();
                     break;
             }
         }

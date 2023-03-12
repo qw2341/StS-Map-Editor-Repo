@@ -85,4 +85,8 @@ public class MapManipulator {
     public static void removeNode(int x, int y) {
         removeNode(NodeLinker.getNode(x,y));
     }
+
+    public static void removeAllNode() {
+        AbstractDungeon.map.forEach(ArrayList::clear);
+    }
 }

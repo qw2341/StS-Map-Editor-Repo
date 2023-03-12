@@ -6,7 +6,10 @@
       "Import a map from your clipboard. Will replace the map and seed. Also will put you on the first floor.",
       "Export",
       "Export to Clipboard",
-      "Copy the entire map into the clipboard, includes all your changes on ALL floors."
+      "Copy the entire map into the clipboard, includes all your changes on ALL floors. Use this option on the last act if you wish to export all of your changes.",
+      "Clear",
+      "Clear the Map",
+      "Remove all nodes, except for the boss room. Make sure you haven't entered any room this act!"
     ]
   }
 }
