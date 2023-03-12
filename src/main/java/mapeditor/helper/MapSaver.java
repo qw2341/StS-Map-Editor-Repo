@@ -44,18 +44,18 @@ public class MapSaver{
         ADD, LINK, REMOVE
     }
     public static class MapEditAction implements Serializable {
-        ActionType action;
+        ActionType action = ActionType.ADD;
 
-        MapEditor.RoomType roomType;
+        MapEditor.RoomType roomType = MapEditor.RoomType.EVENT;
 
-        int pX;
-        int pY;
-        float pOffX;
-        float pOffY;
-        int cX;
-        int cY;
-        float cOffX;
-        float cOffY;
+        int pX = 0;
+        int pY = 0;
+        float pOffX = 0.0f;
+        float pOffY = 0.0f;
+        int cX = 0;
+        int cY = 0;
+        float cOffX = 0.0f;
+        float cOffY = 0.0f;
 
         boolean isBoss = false;
 
@@ -93,7 +93,7 @@ public class MapSaver{
 
         public MapEditAction(int[] nums) {
             this.action = ActionType.values()[nums[0]];
-            this.roomType = MapEditor.RoomType.values()[nums[1]];
+            this.roomType = nums[1] == -1 ? null : MapEditor.RoomType.values()[nums[1]];
             this.pX = nums[2];
             this.pY = nums[3];
             this.pOffX = nums[4];
@@ -106,7 +106,7 @@ public class MapSaver{
         }
 
         public void execute() {
-//            MapEditor.logger.info("Executing " + this.toString());
+            MapEditor.logger.info("Executing " + this.toString());
             switch (action) {
                 case ADD:
                     MapManipulator.placeNode(this.roomType, pX,pY,pOffX,pOffY);
@@ -128,7 +128,7 @@ public class MapSaver{
         public int[] serialize() {
             int[] nums = new int[11];
             nums[0] = this.action.ordinal();
-            nums[1] = this.roomType.ordinal();
+            nums[1] = this.roomType == null ? -1 : this.roomType.ordinal();
             nums[2] = this.pX;
             nums[3] = this.pY;
             nums[4] = (int) this.pOffX;
@@ -144,6 +144,7 @@ public class MapSaver{
 
     public static HashMap<String,ArrayList<MapEditAction>> edits = new HashMap<>();
 
+    public static boolean isImported = false;
 //    @Override
 //    public Queue<MapEditAction> onSave() {
 //        return edits;
@@ -166,6 +167,20 @@ public class MapSaver{
     }
 
     public void load() throws IOException {
+        MapEditor.logger.info("Loading Map");
+        if(isImported) {
+            MapEditor.logger.info("Imported Map detected, loading imported map");
+            isImported = false;
+
+            if(edits.get(AbstractDungeon.id) != null) {
+                MapEditor.logger.info("Applying Map Changes");
+                for (MapEditAction e : edits.get(AbstractDungeon.id)) {
+                    e.execute();
+                }
+            }
+
+            return;
+        }
         Reader reader = Files.newBufferedReader(Paths.get(this.filePath));
         HashMap<String,ArrayList<MapEditAction>> editActions = null;
         try {
@@ -196,10 +211,24 @@ public class MapSaver{
     }
 
     public void save() throws IOException {
+        MapEditor.logger.info("Saving Map");
         FileWriter fileWriter = new FileWriter(this.filePath);
         CustomSavable.saveFileGson.toJson(edits, mapEditType, fileWriter);
         fileWriter.flush();
         fileWriter.close();
+    }
+
+    public static void clear() {
+        MapEditor.logger.info("Clearing Saved Map");
+        MapSaver.edits.clear();
+        isImported = false;
+        try {
+            MapEditor.mapSaver.save();
+        } catch (IOException e) {
+            MapEditor.logger.info("Failed to save map modifications!");
+            e.printStackTrace();
+        }
+        MapEditor.logger.info("Map Cleared");
     }
 
     public static void addEdit(MapEditAction e) {
@@ -215,13 +244,16 @@ public class MapSaver{
         setClipboardString(getEncodedMap());
     }
     public static void importMap() {
+        MapEditor.logger.info("Decoding Map from clipboard");
         SerializableMap sMap = getDecodedMap(getClipboardString());
         if(sMap != null) {
+            MapEditor.logger.info("Decoding successful, now importing");
             Settings.seed = sMap.seed;
-            AbstractDungeon.dungeonMapScreen.closeInstantly();
+            AbstractDungeon.closeCurrentScreen();
             AbstractDungeon.generateSeeds();
             resetDungeon();
             edits = new HashMap<>();
+            isImported = true;
 
             for (String key : sMap.edits.keySet()) {
                 ArrayList<MapEditAction> editActions = new ArrayList<>();
@@ -231,11 +263,6 @@ public class MapSaver{
                 edits.put(key, editActions);
             }
 
-            if(edits.get(AbstractDungeon.id) != null) {
-                for (MapEditAction e : edits.get(AbstractDungeon.id)) {
-                    e.execute();
-                }
-            }
         }
     }
 
@@ -292,17 +319,7 @@ public class MapSaver{
             AbstractDungeon.actNum = 0;
             AbstractDungeon.id = Exordium.ID;
             AbstractDungeon.player.masterDeck.removeCard(AscendersBane.ID);
-            AbstractDungeon.dungeonMapScreen.open(true);
-
-//            AbstractDungeon.actionManager.addToBottom(new AbstractGameAction() {
-//                @Override
-//                public void update() {
-//                    SaveFile saveFile = new SaveFile(SaveFile.SaveType.ENTER_ROOM);
-//                    SaveAndContinue.save(saveFile);
-//                    AbstractDungeon.effectList.add(new GameSavedEffect());
-//                    isDone = true;
-//                }
-//            });
+            if(AbstractDungeon.isScreenUp) AbstractDungeon.closeCurrentScreen();
 
             if (Loader.isModLoaded("actlikeit")) {
                 try {

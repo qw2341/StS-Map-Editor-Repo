@@ -58,24 +58,15 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
 
     @Override
     public void receiveStartAct() {
-//        MapSaver.edits.clear();
-//        try {
-//            mapSaver.save();
-//        } catch (IOException e) {
-//            logger.info("Failed to save map modifications!");
-//            e.printStackTrace();
-//        }
+        if(MapSaver.edits.get(AbstractDungeon.id) != null) {
+            for(MapSaver.MapEditAction e : MapSaver.edits.get(AbstractDungeon.id)) {
+                e.execute();
+            }
+        }
     }
     @Override
     public void receivePostDeath() {
-        MapSaver.edits.clear();
-        try {
-            mapSaver.save();
-        } catch (IOException e) {
-            logger.info("Failed to save map modifications!");
-            e.printStackTrace();
-        }
-        logger.info("Map Cleared");
+        MapSaver.clear();
     }
 
 
