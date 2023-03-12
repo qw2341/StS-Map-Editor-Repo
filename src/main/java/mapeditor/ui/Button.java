@@ -8,6 +8,7 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.*;
 import com.megacrit.cardcrawl.helpers.controller.CInputActionSet;
 import com.megacrit.cardcrawl.helpers.input.InputHelper;
+import com.megacrit.cardcrawl.map.Legend;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -47,7 +48,7 @@ public class Button {
             CardCrawlGame.sound.playA("UI_HOVER", -0.3F);
         }
         if(this.hb.hovered) {
-            TipHelper.queuePowerTips(this.x - 128.0F * Settings.scale, this.y,tips);
+            TipHelper.queuePowerTips(Legend.X - 420.0f * Settings.scale, this.y,tips);
         }
 
         if (this.hb.hovered && InputHelper.justClickedLeft) {

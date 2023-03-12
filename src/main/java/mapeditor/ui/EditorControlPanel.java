@@ -25,10 +25,10 @@ public class EditorControlPanel {
         buttons = new ArrayList<>();
         ArrayList<PowerTip> tips1 = new ArrayList<>();
         tips1.add(new PowerTip(TEXT[1], TEXT[2]));
-        buttons.add(new Button(TEXT[0], cx - buttonSpacing, cy, ImageMaster.FILTER_ARROW, tips1, MapSaver::importMap, true));
+        buttons.add(new Button(TEXT[0], cx - buttonSpacing, cy, ImageMaster.FILTER_ARROW, tips1, MapSaver::importMap, false));
         ArrayList<PowerTip> tips2 = new ArrayList<>();
         tips2.add(new PowerTip(TEXT[4], TEXT[5]));
-        buttons.add(new Button(TEXT[3], cx + buttonSpacing, cy, ImageMaster.FILTER_ARROW, tips2, MapSaver::exportMap, false));
+        buttons.add(new Button(TEXT[3], cx + buttonSpacing, cy, ImageMaster.FILTER_ARROW, tips2, MapSaver::exportMap, true));
     }
 
     public void update() {

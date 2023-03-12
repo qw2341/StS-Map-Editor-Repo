@@ -75,6 +75,7 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
             logger.info("Failed to save map modifications!");
             e.printStackTrace();
         }
+        logger.info("Map Cleared");
     }
 
 

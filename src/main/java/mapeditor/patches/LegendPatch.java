@@ -10,19 +10,25 @@ import mapeditor.ui.EditorControlPanel;
 
 public class LegendPatch {
     public static EditorControlPanel panel = new EditorControlPanel(Legend.X, Legend.Y - 400.0F * Settings.yScale);
+    public static boolean showPanel = false;
 
-    @SpirePatch2(clz = Legend.class, method = "update")
+    @SpirePatch2(clz = Legend.class, method = "update", paramtypez = {float.class, boolean.class})
     public static class LegendUpdatePatch {
         @SpirePostfixPatch
-        public static void PostFix() {
-            panel.update();
+        public static void PostFix(float mapAlpha, boolean isMapScreen) {
+            if (mapAlpha >= 0.8F && isMapScreen) {
+                showPanel = true;
+                panel.update();
+            } else {
+                showPanel = false;
+            }
         }
     }
     @SpirePatch2(clz = Legend.class, method = "render", paramtypez = {SpriteBatch.class})
     public static class LegendRenderPatch {
         @SpirePostfixPatch
         public static void PostFix(SpriteBatch sb) {
-            panel.render(sb);
+            if(showPanel) panel.render(sb);
         }
     }
 

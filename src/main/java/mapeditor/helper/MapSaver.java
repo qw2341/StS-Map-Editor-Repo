@@ -2,22 +2,43 @@ package mapeditor.helper;
 
 import basemod.abstracts.CustomSavable;
 import com.badlogic.gdx.Gdx;
+import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.google.gson.reflect.TypeToken;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.cards.curses.AscendersBane;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.dungeons.Exordium;
 import com.megacrit.cardcrawl.map.MapRoomNode;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.saveAndContinue.SaveAndContinue;
+import com.megacrit.cardcrawl.saveAndContinue.SaveFile;
+import com.megacrit.cardcrawl.saveAndContinue.SaveFileObfuscator;
+import com.megacrit.cardcrawl.vfx.GameSavedEffect;
 import mapeditor.MapEditor;
+import mapeditor.savables.SerializableMap;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class MapSaver{
+    public static final String OBFUSCATION_KEY = "key";
     private final Type mapEditType;
     private String filePath;
     private File file;
+    private static final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
 
     public enum ActionType {
         ADD, LINK, REMOVE
@@ -70,8 +91,22 @@ public class MapSaver{
             this.pY = removingNode.y;
         }
 
+        public MapEditAction(int[] nums) {
+            this.action = ActionType.values()[nums[0]];
+            this.roomType = MapEditor.RoomType.values()[nums[1]];
+            this.pX = nums[2];
+            this.pY = nums[3];
+            this.pOffX = nums[4];
+            this.pOffY = nums[5];
+            this.cX = nums[6];
+            this.cY = nums[7];
+            this.cOffX = nums[8];
+            this.cOffY = nums[9];
+            this.isBoss = !(nums[10] == 0);
+        }
+
         public void execute() {
-            MapEditor.logger.info("Executing " + this.toString());
+//            MapEditor.logger.info("Executing " + this.toString());
             switch (action) {
                 case ADD:
                     MapManipulator.placeNode(this.roomType, pX,pY,pOffX,pOffY);
@@ -88,6 +123,22 @@ public class MapSaver{
         @Override
         public String toString() {
             return "[ Action: " + this.action + "; x = "+ this.pX + "; y = " + this.pY + "; ]";
+        }
+
+        public int[] serialize() {
+            int[] nums = new int[11];
+            nums[0] = this.action.ordinal();
+            nums[1] = this.roomType.ordinal();
+            nums[2] = this.pX;
+            nums[3] = this.pY;
+            nums[4] = (int) this.pOffX;
+            nums[5] = (int) this.pOffY;
+            nums[6] = this.cX;
+            nums[7] = this.cY;
+            nums[8] = (int) this.cOffX;
+            nums[9] = (int) this.cOffY;
+            nums[10] = this.isBoss ? 1 : 0;
+            return nums;
         }
     }
 
@@ -161,9 +212,111 @@ public class MapSaver{
     }
 
     public static void exportMap() {
-        MapEditor.logger.info("EXPORT!");
+        setClipboardString(getEncodedMap());
     }
     public static void importMap() {
-        MapEditor.logger.info("IMPORT!");
+        SerializableMap sMap = getDecodedMap(getClipboardString());
+        if(sMap != null) {
+            Settings.seed = sMap.seed;
+            AbstractDungeon.dungeonMapScreen.closeInstantly();
+            AbstractDungeon.generateSeeds();
+            resetDungeon();
+            edits = new HashMap<>();
+
+            for (String key : sMap.edits.keySet()) {
+                ArrayList<MapEditAction> editActions = new ArrayList<>();
+                for (int[] numArr : sMap.edits.get(key)) {
+                    editActions.add(new MapEditAction(numArr));
+                }
+                edits.put(key, editActions);
+            }
+
+            if(edits.get(AbstractDungeon.id) != null) {
+                for (MapEditAction e : edits.get(AbstractDungeon.id)) {
+                    e.execute();
+                }
+            }
+        }
+    }
+
+    static String getEncodedMap() {
+        SerializableMap sMap = new SerializableMap(Settings.seed, edits);
+        return SaveFileObfuscator.encode(CustomSavable.saveFileGson.toJson(sMap),OBFUSCATION_KEY);
+    }
+
+    static SerializableMap getDecodedMap(String encodedMap) {
+        String decodedMap = SaveFileObfuscator.decode(encodedMap, OBFUSCATION_KEY);
+        try {
+            return CustomSavable.saveFileGson.fromJson(decodedMap, SerializableMap.typeToken);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MapEditor.logger.info("Error occurred while importing Map from clipboard");
+        }
+        return null;
+    }
+
+    public static void setClipboardString(String content) {
+        StringSelection selection = new StringSelection(content);
+        clipboard.setContents(selection,selection);
+    }
+
+    public static String getClipboardString() {
+        try {
+            return (String) clipboard.getData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException | IOException e) {
+            MapEditor.logger.info("Failed to import map from Clipboard");
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
+     * Used the method from RKey from Isaac Extend Mod
+     */
+    private static void resetDungeon() {
+        if (!AbstractDungeon.player.isDead) {
+            AbstractDungeon.resetPlayer();
+            AbstractDungeon.player.movePosition(Settings.WIDTH * 0.25F, AbstractDungeon.floorY);
+            CardCrawlGame.nextDungeon = "Exordium";
+            AbstractDungeon.isDungeonBeaten = true;
+
+            CardCrawlGame.music.fadeOutBGM();
+            CardCrawlGame.music.fadeOutTempBGM();
+            AbstractDungeon.fadeOut();
+            AbstractDungeon.topLevelEffects.clear();
+            AbstractDungeon.actionManager.actions.clear();
+            AbstractDungeon.effectList.clear();
+            AbstractDungeon.effectsQueue.clear();
+            AbstractDungeon.getCurrRoom().phase = AbstractRoom.RoomPhase.COMPLETE;
+            AbstractDungeon.floorNum = 1;
+            AbstractDungeon.actNum = 0;
+            AbstractDungeon.id = Exordium.ID;
+            AbstractDungeon.player.masterDeck.removeCard(AscendersBane.ID);
+            AbstractDungeon.dungeonMapScreen.open(true);
+
+//            AbstractDungeon.actionManager.addToBottom(new AbstractGameAction() {
+//                @Override
+//                public void update() {
+//                    SaveFile saveFile = new SaveFile(SaveFile.SaveType.ENTER_ROOM);
+//                    SaveAndContinue.save(saveFile);
+//                    AbstractDungeon.effectList.add(new GameSavedEffect());
+//                    isDone = true;
+//                }
+//            });
+
+            if (Loader.isModLoaded("actlikeit")) {
+                try {
+                    Class<?> cls = Class.forName("actlikeit.savefields.BehindTheScenesActNum");
+                    Field field = cls.getDeclaredField("bc");
+                    field.setAccessible(true);
+                    Object bc = field.get(null);
+                    field = cls.getDeclaredField("actNum");
+                    field.setAccessible(true);
+                    field.set(bc, 0);
+                } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
