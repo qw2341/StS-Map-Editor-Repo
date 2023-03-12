@@ -4,7 +4,6 @@ import basemod.abstracts.CustomSavable;
 import com.badlogic.gdx.Gdx;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.google.gson.reflect.TypeToken;
-import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import mapeditor.MapEditor;
@@ -92,7 +91,7 @@ public class MapSaver{
         }
     }
 
-    public static ArrayList<MapEditAction> edits = new ArrayList<>();
+    public static HashMap<String,ArrayList<MapEditAction>> edits = new HashMap<>();
 
 //    @Override
 //    public Queue<MapEditAction> onSave() {
@@ -112,12 +111,12 @@ public class MapSaver{
         this.filePath = SpireConfig.makeFilePath("MapEditor","MapEdits","json");
         this.file = new File(this.filePath);
         this.file.createNewFile();
-        this.mapEditType = new TypeToken<ArrayList<MapEditAction>>() { }.getType();
+        this.mapEditType = new TypeToken<HashMap<String,ArrayList<MapEditAction>>>() { }.getType();
     }
 
     public void load() throws IOException {
         Reader reader = Files.newBufferedReader(Paths.get(this.filePath));
-        ArrayList<MapEditAction> editActions = null;
+        HashMap<String,ArrayList<MapEditAction>> editActions = null;
         try {
             editActions = CustomSavable.saveFileGson.fromJson(reader, mapEditType);
         } catch (Exception e){
@@ -128,12 +127,18 @@ public class MapSaver{
 
         if (editActions != null) {
             edits = editActions;
-            Iterator<MapEditAction> editIt = editActions.iterator();
-            while (editIt.hasNext()) {
-                editIt.next().execute();
+            ArrayList<MapEditAction> mapEditActions = editActions.get(AbstractDungeon.id);
+            if(mapEditActions == null) {
+                edits.put(AbstractDungeon.id, new ArrayList<MapEditAction>());
+            } else {
+                Iterator<MapEditAction> editIt = mapEditActions.iterator();
+                while (editIt.hasNext()) {
+                    editIt.next().execute();
+                }
             }
+
         } else {
-            edits = new ArrayList<>();
+            edits = new HashMap<>();
         }
 
         reader.close();
@@ -144,5 +149,14 @@ public class MapSaver{
         CustomSavable.saveFileGson.toJson(edits, mapEditType, fileWriter);
         fileWriter.flush();
         fileWriter.close();
+    }
+
+    public static void addEdit(MapEditAction e) {
+        ArrayList<MapEditAction> dungeonEdit = MapSaver.edits.get(AbstractDungeon.id);
+        if(dungeonEdit == null) {
+            dungeonEdit = new ArrayList<>();
+            edits.put(AbstractDungeon.id, dungeonEdit);
+        }
+        dungeonEdit.add(e);
     }
 }

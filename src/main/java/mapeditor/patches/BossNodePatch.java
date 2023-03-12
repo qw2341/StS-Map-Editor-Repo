@@ -19,7 +19,7 @@ public class BossNodePatch {
             if(__instance.bossHb.hovered && InputHelper.justClickedRight) {
                 if (NodeLinker.node1 != null) {
                     NodeLinker.linkBoss(NodeLinker.node1);
-                    MapSaver.edits.add(new MapSaver.MapEditAction(NodeLinker.node1, null));
+                    MapSaver.addEdit(new MapSaver.MapEditAction(NodeLinker.node1, null));
                     NodeLinker.node1 = null;
                 }
             }

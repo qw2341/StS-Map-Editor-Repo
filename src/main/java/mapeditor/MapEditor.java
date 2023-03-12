@@ -56,13 +56,13 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
 
     @Override
     public void receiveStartAct() {
-        MapSaver.edits.clear();
-        try {
-            mapSaver.save();
-        } catch (IOException e) {
-            logger.info("Failed to save map modifications!");
-            e.printStackTrace();
-        }
+//        MapSaver.edits.clear();
+//        try {
+//            mapSaver.save();
+//        } catch (IOException e) {
+//            logger.info("Failed to save map modifications!");
+//            e.printStackTrace();
+//        }
     }
     @Override
     public void receivePostDeath() {
@@ -151,7 +151,7 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
                 //Place down nodes
                 if(selectedRoomType != null) {
                     MapRoomNode node =  MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY);
-                    MapSaver.edits.add(new MapSaver.MapEditAction(selectedRoomType, node.x, node.y, node.offsetX, node.offsetY));
+                    MapSaver.addEdit(new MapSaver.MapEditAction(selectedRoomType, node.x, node.y, node.offsetX, node.offsetY));
                     if(!ctrlKey.isPressed())
                         selectedRoomType = null;
                 }
