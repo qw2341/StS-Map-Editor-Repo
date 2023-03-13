@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class MapManipulator {
     public static boolean removingNode = false;
 
-    public static MapRoomNode placeNode(MapEditor.RoomType roomType, int x, int y) {
+    public static MapRoomNode placeNode(MapEditor.RoomType roomType, int x, int y, boolean hasEmerald) {
         x -=  MapRoomNode.OFFSET_X;
         y -= DungeonMapScreen.offsetY + 180.0F * Settings.scale;
 
@@ -31,6 +31,8 @@ public class MapManipulator {
         roomToAdd.room = getRoom(roomType);
         MapNodePatches.setNodeCustom(roomToAdd, true);
 
+        roomToAdd.hasEmeraldKey = hasEmerald;
+
         roomToAdd.offsetX = x - xNum * 128.0f;
         roomToAdd.offsetY = y - yNum * Settings.MAP_DST_Y;
 //        MapEditor.logger.info("offsetX: " + roomToAdd.offsetX + " offsetY: " + roomToAdd.offsetY + " at (" + x + ", " + y + ")");
@@ -41,13 +43,14 @@ public class MapManipulator {
         return roomToAdd;
     }
 
-    public static void placeNode(MapEditor.RoomType roomType, int x, int y, float offsetX,float offsetY) {
+    public static void placeNode(MapEditor.RoomType roomType, int x, int y, float offsetX,float offsetY, boolean hasEmerald) {
         ArrayList<ArrayList<MapRoomNode>> map = AbstractDungeon.map;
         MapRoomNode mapRoomNode = new MapRoomNode(x,y);
         mapRoomNode.offsetX = offsetX;
         mapRoomNode.offsetY = offsetY;
         mapRoomNode.room = getRoom(roomType);
         MapNodePatches.setNodeCustom(mapRoomNode, true);
+        mapRoomNode.hasEmeraldKey = hasEmerald;
         map.get(y).add(mapRoomNode);
     }
 

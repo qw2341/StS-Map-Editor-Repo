@@ -59,13 +59,14 @@ public class MapSaver{
 
         boolean isBoss = false;
 
-        public MapEditAction(MapEditor.RoomType roomType, int x, int y, float pOffX, float pOffY) {
+        public MapEditAction(MapEditor.RoomType roomType, int x, int y, float pOffX, float pOffY, boolean hasEmerald) {
             this.roomType = roomType;
             this.pX = x;
             this.pY = y;
             this.pOffX = pOffX;
             this.pOffY = pOffY;
             this.action = ActionType.ADD;
+            this.isBoss = hasEmerald;
         }
 
         public MapEditAction(MapRoomNode parent, MapRoomNode child) {
@@ -113,7 +114,7 @@ public class MapSaver{
             MapEditor.logger.info("Executing " + this.toString());
             switch (action) {
                 case ADD:
-                    MapManipulator.placeNode(this.roomType, pX,pY,pOffX,pOffY);
+                    MapManipulator.placeNode(this.roomType, pX,pY,pOffX,pOffY,isBoss);
                     break;
                 case LINK:
                     NodeLinker.link(this.pX,this.pY,pOffX,pOffY,cX,cY,cOffX,cOffY, this.isBoss);

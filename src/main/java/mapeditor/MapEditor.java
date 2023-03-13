@@ -169,8 +169,9 @@ public class MapEditor implements EditStringsSubscriber, PostInitializeSubscribe
                 }
                 //Place down nodes
                 if(selectedRoomType != null) {
-                    MapRoomNode node =  MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY);
-                    MapSaver.addEdit(new MapSaver.MapEditAction(selectedRoomType, node.x, node.y, node.offsetX, node.offsetY));
+                    boolean hasEm = shiftKey.isPressed();
+                    MapRoomNode node =  MapManipulator.placeNode(selectedRoomType, InputHelper.mX, InputHelper.mY,hasEm);
+                    MapSaver.addEdit(new MapSaver.MapEditAction(selectedRoomType, node.x, node.y, node.offsetX, node.offsetY, hasEm));
                     if(!ctrlKey.isPressed())
                         selectedRoomType = null;
                 }
