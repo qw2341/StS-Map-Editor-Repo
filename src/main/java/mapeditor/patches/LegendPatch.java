@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class LegendPatch {
     public static EditorControlPanel panel = new EditorControlPanel(Legend.X, Legend.Y - 400.0F * Settings.yScale);
     public static boolean showPanel = false;
-    public static Hitbox hb = new Hitbox(Legend.X + 128, Legend.Y + 200, 64 * Settings.scale, 64 * Settings.scale);
+    public static Hitbox hb = new Hitbox(Legend.X + 84 * Settings.scale, Legend.Y + 136 * Settings.scale, 64 * Settings.scale, 64 * Settings.scale);
     public static ArrayList<PowerTip> tips;
     static {
         tips = new ArrayList<>();
@@ -36,7 +36,7 @@ public class LegendPatch {
                 hb.update();
 
                 if(hb.hovered) {
-                    TipHelper.queuePowerTips(Legend.X - 128,Legend.Y - 200, tips);
+                    TipHelper.queuePowerTips(Legend.X - 128 * Settings.scale,Legend.Y - 250 * Settings.scale, tips);
                 }
             } else {
                 showPanel = false;
@@ -47,8 +47,8 @@ public class LegendPatch {
     public static class LegendRenderPatch {
         @SpirePostfixPatch
         public static void PostFix(SpriteBatch sb) {
-            hb.render(sb);
             if(showPanel) {
+                hb.render(sb);
                 panel.render(sb);
                 Texture qMark = ImageMaster.RUN_HISTORY_MAP_ICON_EVENT;
                 sb.draw(qMark, hb.x, hb.y, 16.0F, 16.0F, 64.0F, 64.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, qMark.getWidth(), qMark.getHeight(), false, false);
