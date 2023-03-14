@@ -67,7 +67,7 @@ public class Button {
     public void render(SpriteBatch sb) {
         hb.render(sb);
         Color color = !this.hb.hovered ? Settings.CREAM_COLOR : Settings.GOLD_COLOR;
-        FontHelper.renderFontCentered(sb, FontHelper.topPanelInfoFont, this.text, this.x, this.y - 32.0f, color);
+        FontHelper.renderFontCentered(sb, FontHelper.topPanelInfoFont, this.text, this.x, this.y - 16.0f, color);
         sb.setColor(color);
 
         sb.draw(this.texture, this.x - 32.0f, this.y, 16.0F, 16.0F, 64.0F, 64.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, this.texture.getWidth(), this.texture.getHeight(), false, flipY);

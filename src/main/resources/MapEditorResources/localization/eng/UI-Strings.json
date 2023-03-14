@@ -9,7 +9,9 @@
       "Copy the entire map into the clipboard, includes all your changes on ALL floors. Use this option on the last act if you wish to export all of your changes.",
       "Clear",
       "Clear the Map",
-      "Remove all nodes, except for the boss room. Make sure you haven't entered any room this act!"
+      "Remove all nodes, except for the boss room. Make sure you haven't entered any room this act!",
+      "Editor Controls",
+      "Left click on icons to select room type, then left click on the map to place it (hold shift to place it with emerald key). Right click on a map node start a connection, click another to end. Shift + right click to delete a node. Hold down Ctrl for fast-placement mode. Press Esc while selecting to cancel selection."
     ]
   }
 }
