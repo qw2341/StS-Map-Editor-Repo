@@ -33,7 +33,7 @@ public class MapManipulator {
 
         roomToAdd.hasEmeraldKey = hasEmerald;
 
-        roomToAdd.offsetX = x - xNum * 128.0f;
+        roomToAdd.offsetX = x - xNum * 128.0f * Settings.scale;
         roomToAdd.offsetY = y - yNum * Settings.MAP_DST_Y;
 //        MapEditor.logger.info("offsetX: " + roomToAdd.offsetX + " offsetY: " + roomToAdd.offsetY + " at (" + x + ", " + y + ")");
 //        MapEditor.logger.info("Placing node of Type: " + roomType + " at (" + xNum + ", " + yNum + ")");
@@ -46,8 +46,8 @@ public class MapManipulator {
     public static void placeNode(MapEditor.RoomType roomType, int x, int y, float offsetX,float offsetY, boolean hasEmerald) {
         ArrayList<ArrayList<MapRoomNode>> map = AbstractDungeon.map;
         MapRoomNode mapRoomNode = new MapRoomNode(x,y);
-        mapRoomNode.offsetX = offsetX;
-        mapRoomNode.offsetY = offsetY;
+        mapRoomNode.offsetX = offsetX * Settings.scale;
+        mapRoomNode.offsetY = offsetY * Settings.yScale;
         mapRoomNode.room = getRoom(roomType);
         MapNodePatches.setNodeCustom(mapRoomNode, true);
         mapRoomNode.hasEmeraldKey = hasEmerald;
